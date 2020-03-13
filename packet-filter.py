@@ -17,10 +17,15 @@ IP_PORTS = {}
 
 #===Temporary for testing===#
 # https should be blocked
-IP_DATE['192.168.220.64'] = datetime.now() - timedelta(days=1)
-IP_PORTS['192.168.220.64'] = [53, 80, 5528]
+#IP_DATE['192.168.220.64'] = datetime.now() - timedelta(days=1)
+#IP_PORTS['192.168.220.64'] = [53, 80, 5528]
 
+# Top level method that every packet from wlan0 is sent to
 def filter(packet):
+    #==Call various filters here==#
+    ipPortFilter(packet)
+
+def ipPortFilter(packet):
     pkt = IP(packet.get_payload())
     pkt_ip = pkt.src
     if pkt_ip not in IP_DATE:
