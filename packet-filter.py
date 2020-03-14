@@ -14,16 +14,25 @@ IP_DATE = {}
 # device usually connects to detect the kind of applications
 # that are being run
 IP_PORTS = {}
+IP_DST_IPS = {}
 
 #===Temporary for testing===#
 # https should be blocked
-#IP_DATE['192.168.220.64'] = datetime.now() - timedelta(days=1)
-#IP_PORTS['192.168.220.64'] = [53, 80, 5528]
+IP_DATE['192.168.220.132'] = datetime.now() - timedelta(days=1)
+IP_PORTS['192.168.220.132'] = [53, 80, 443, 5528]
+IP_DST_IPS['192.168.220.132'] = ['8.8.8.8']
 
 # Top level method that every packet from wlan0 is sent to
 def filter(packet):
     #==Call various filters here==#
-    ipPortFilter(packet)
+    accept = True
+    accept = accept and ipPortFilter(packet)
+    accept = accept and ipFilter(packet)
+
+    if accept:
+        packet.accept()
+    else:
+        packet.drop()
 
 def ipPortFilter(packet):
     pkt = IP(packet.get_payload())
@@ -32,14 +41,14 @@ def ipPortFilter(packet):
         print "> New device at ip: " + str(pkt_ip)
         IP_DATE[pkt_ip] = datetime.now()
         IP_PORTS[pkt_ip] = []
+        IP_DST_IPS[pkt_ip] = []
         
     if TCP in pkt:
         dst_port = pkt[TCP].dport
     elif UDP in pkt:
         dst_port = pkt[UDP].dport
     else: # For now accept unknown protocols
-        packet.accept()
-        return
+        return True
 
     ports = IP_PORTS[pkt_ip]
     # Check if the device has already been tracked for a day
@@ -47,16 +56,40 @@ def ipPortFilter(packet):
         # Check if the port is valid, if not then drop the
         # packet
         if dst_port in ports:
-            packet.accept()
+            return True
         else:
             print ">>> Packet dropped from " + str(pkt_ip) + " on unvalidated port: " + str(dst_port)
-            packet.drop()
+            return False
     else:
         # Device is new so track the ports that it uses
         if dst_port not in ports:
             print ">> New port on ip: " + str(pkt_ip) + " port: " + str(dst_port)
             ports.append(dst_port)
-        packet.accept()
+        return True
+
+def ipFilter(packet):
+    pkt = IP(packet.get_payload())
+    pkt_src_ip = pkt.src
+    pkt_dst_ip = pkt.dst
+
+    if pkt_src_ip not in IP_DATE:
+        print "> New device at ip: " + str(pkt_src_ip)
+        IP_DATE[pkt_src_ip] = datetime.now()
+        IP_PORTS[pkt_src_ip] = []
+        IP_DST_IPS[pkt_src_ip] = []
+
+    ips = IP_DST_IPS[pkt_src_ip]
+    if (datetime.now() - IP_DATE[pkt_src_ip]).days > 0:
+        if pkt_dst_ip in ips:
+            return True
+        else:
+            print ">>> Packet dropped from " + str(pkt_src_ip) + " to unvalidated destination: " + str(pkt_dst_ip)
+            return False
+    else:
+        if pkt_dst_ip not in ips:
+            print ">> New destination ip for ip: " + str(pkt_src_ip) + " ip: " + str(pkt_dst_ip)
+            ips.append(pkt_dst_ip)
+        return True
     
 
 nfqueue = NetfilterQueue()
