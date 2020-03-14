@@ -10,5 +10,9 @@ After going through that setup in its entirety, add these three iptable firewall
   sudo iptables -A FORWARD -i wlan0 -j NFQUEUE --queue-num 1
 ```
 At this point the access point should be broadcasting and discoverable but after connecting you will not be able to connect to the internet just yet. We now need to start the python daemon for packet-filter.py to start it listening and accepting (or denying) packets.
-``` sudo python packet-filter.py```
+``` 
+sudo python packet-filter.py
+```
 Now all connected devices should be able to reach the internet and any log statements should print to the screen.
+## Additions
+This project was made with the goal of being extremely extendable and pluggable. Any new firewall rules can be added by including them in the ```filter(packet)``` function. An example has been provided in the packet-filter.py code.
