@@ -18,9 +18,9 @@ IP_DST_IPS = {}
 
 #===Temporary for testing===#
 # https should be blocked
-IP_DATE['192.168.220.132'] = datetime.now() - timedelta(days=1)
-IP_PORTS['192.168.220.132'] = [53, 80, 443, 5528]
-IP_DST_IPS['192.168.220.132'] = ['8.8.8.8']
+#IP_DATE['192.168.220.132'] = datetime.now() - timedelta(days=1)
+#IP_PORTS['192.168.220.132'] = [53, 80, 443, 5528]
+#IP_DST_IPS['192.168.220.132'] = ['8.8.8.8']
 
 # Top level method that every packet from wlan0 is sent to
 def filter(packet):
