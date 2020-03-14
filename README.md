@@ -2,10 +2,10 @@
 ## Overview
  IOT is one of the largest growing industries right now and with that comes a lot of growing pains. One of the main concerns with IOT devices currently is their security. To help address this we decided to not only build something that could monitor these devices but also actively block traffic. This wireless access point running on a raspberry pi is not only capable of doing just that but also is extremely pluggable and easily modifiable.
 ## Setup
-This guide is really useful to setting up a rasperry pi to be a wireless access point - https://pimylifeup.com/raspberry-pi-wireless-access-point/
+This guide is really useful to setting up a rasperry pi to be a wireless access point - https://pimylifeup.com/raspberry-pi-wireless-access-point/. 
 After going through that setup in its entirety, add these three iptable firewall rules.
 ```
-  sudo iptables -A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT # Allow ssh for yourself if needed \n
+  sudo iptables -A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT # Allow ssh for yourself if needed
   sudo iptables -A INPUT -i wlan0 -j NFQUEUE --queue-num 1
   sudo iptables -A FORWARD -i wlan0 -j NFQUEUE --queue-num 1
 ```
